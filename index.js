@@ -1,6 +1,8 @@
 const express = require("express");
 const { ApolloServer, gql } = require("apollo-server-express");
 
+import models from "./models";
+
 async function startApolloServer() {
   // Construct a schema, using GraphQL schema language
   const typeDefs = gql`
@@ -22,7 +24,11 @@ async function startApolloServer() {
   const app = express();
   server.applyMiddleware({ app });
 
-  await new Promise((resolve) => app.listen({ port: 4000 }, resolve));
+  await new Promise((resolve) =>
+    models.sequelize.sync().then(() => {
+      app.listen({ port: 4000 }, resolve);
+    })
+  );
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
   return { server, app };
 }
