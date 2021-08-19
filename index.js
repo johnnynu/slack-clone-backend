@@ -1,15 +1,16 @@
-const express = require("express");
-const { ApolloServer } = require("apollo-server-express");
+const express = require('express');
+const { ApolloServer } = require('apollo-server-express');
 
-import models from "./models";
+import models from './models';
 
-import path from "path";
-import { fileLoader, mergeTypes, mergeResolvers } from "merge-graphql-schemas";
+import path from 'path';
+import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas';
+import cors from 'cors';
 
-const typeDefs = mergeTypes(fileLoader(path.join(__dirname, "./schema")));
+const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './schema')));
 
 const resolvers = mergeResolvers(
-  fileLoader(path.join(__dirname, "./resolvers"))
+  fileLoader(path.join(__dirname, './resolvers'))
 );
 
 async function startApolloServer() {
@@ -26,6 +27,7 @@ async function startApolloServer() {
   await server.start();
 
   const app = express();
+  app.use(cors('*'));
   server.applyMiddleware({ app });
 
   await new Promise((resolve) =>
