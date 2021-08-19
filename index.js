@@ -1,31 +1,35 @@
 const express = require("express");
-const { ApolloServer, gql } = require("apollo-server-express");
+const { ApolloServer } = require("apollo-server-express");
 
 import models from "./models";
 
+import path from "path";
+import { fileLoader, mergeTypes, mergeResolvers } from "merge-graphql-schemas";
+
+const typeDefs = mergeTypes(fileLoader(path.join(__dirname, "./schema")));
+
+const resolvers = mergeResolvers(
+  fileLoader(path.join(__dirname, "./resolvers"))
+);
+
 async function startApolloServer() {
-  // Construct a schema, using GraphQL schema language
-  const typeDefs = gql`
-    type Query {
-      hello: String
-    }
-  `;
-
-  // Provide resolver functions for your schema fields
-  const resolvers = {
-    Query: {
-      hello: () => "nuXO",
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: {
+      models,
+      user: {
+        id: 1,
+      },
     },
-  };
-
-  const server = new ApolloServer({ typeDefs, resolvers });
+  });
   await server.start();
 
   const app = express();
   server.applyMiddleware({ app });
 
   await new Promise((resolve) =>
-    models.sequelize.sync().then(() => {
+    models.sequelize.sync({}).then(() => {
       app.listen({ port: 4000 }, resolve);
     })
   );
