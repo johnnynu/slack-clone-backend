@@ -13,7 +13,17 @@ export default gql`
     allUsers: [User!]!
   }
 
+  type RegisterResponse {
+    success: Boolean!
+    user: User
+    errors: [Error!]
+  }
+
   type Mutation {
-    register(username: String!, email: String!, password: String!): Boolean!
+    register(
+      username: String!
+      email: String!
+      password: String!
+    ): RegisterResponse!
   }
 `;
