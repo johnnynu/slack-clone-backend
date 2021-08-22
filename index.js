@@ -7,6 +7,9 @@ import path from 'path';
 import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas';
 import cors from 'cors';
 
+const SECRET = 'asdgasdgfsdgdfgsdfgiso';
+const SECRET2 = 'ASDFSDAFASFASFISO';
+
 const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './schema')));
 
 const resolvers = mergeResolvers(
@@ -22,6 +25,8 @@ async function startApolloServer() {
       user: {
         id: 1,
       },
+      SECRET,
+      SECRET2,
     },
   });
   await server.start();
