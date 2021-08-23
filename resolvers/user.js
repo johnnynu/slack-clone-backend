@@ -19,25 +19,10 @@ export default {
   },
   Mutation: {
     login: (parent, { email, password }, { models, SECRET, SECRET2 }) =>
-      tryLogin(email, password, models, SECRET),
-    register: async (parent, { password, ...otherArgs }, { models }) => {
+      tryLogin(email, password, models, SECRET, SECRET2),
+    register: async (parent, args, { models }) => {
       try {
-        if (password.length < 5) {
-          return {
-            success: false,
-            errors: [
-              {
-                path: 'password',
-                message: 'Password must be more than 5 characters',
-              },
-            ],
-          };
-        }
-        const hashedPW = await bcrypt.hash(password, 12);
-        const user = await models.User.create({
-          ...otherArgs,
-          password: hashedPW,
-        });
+        const user = await models.User.create(args);
         return {
           success: true,
           user,
