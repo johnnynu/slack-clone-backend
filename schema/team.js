@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server-express");
+const { gql } = require('apollo-server-express');
 
 export default gql`
   type Team {
@@ -7,7 +7,12 @@ export default gql`
     channels: [Channel!]!
   }
 
+  type CreateTeamResponse {
+    success: Boolean!
+    errors: [Error!]
+  }
+
   type Mutation {
-    createTeam(name: String!): Boolean!
+    createTeam(name: String!): CreateTeamResponse!
   }
 `;

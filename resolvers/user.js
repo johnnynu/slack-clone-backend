@@ -1,15 +1,5 @@
-import bcrypt from 'bcrypt';
-import _ from 'lodash';
-
 import { tryLogin } from '../auth';
-
-const formatErrors = (e, models) => {
-  if (e instanceof models.Sequelize.ValidationError) {
-    // _.pick({hello: 'world', b: 2}, 'hello') => {hello: 'world'}
-    return e.errors.map((x) => _.pick(x, ['path', 'message']));
-  }
-  return [{ path: 'name', message: 'something went wrong!' }];
-};
+import formatErrors from '../formatErrors';
 
 export default {
   Query: {
@@ -23,14 +13,15 @@ export default {
     register: async (parent, args, { models }) => {
       try {
         const user = await models.User.create(args);
+
         return {
           success: true,
           user,
         };
-      } catch (error) {
+      } catch (err) {
         return {
           success: false,
-          errors: formatErrors(error, models),
+          errors: formatErrors(err, models),
         };
       }
     },
