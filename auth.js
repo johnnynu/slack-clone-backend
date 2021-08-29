@@ -48,7 +48,6 @@ export const refreshTokens = async (
   }
 
   const user = await models.User.findOne({ where: { id: userId }, raw: true });
-  console.log(user);
 
   if (!user) {
     return {};
