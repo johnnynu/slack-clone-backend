@@ -1,4 +1,5 @@
 import formatErrors from '../formatErrors';
+import team from '../models/team';
 import requiresAuth from '../permissions';
 
 export default {
@@ -30,6 +31,57 @@ export default {
           return {
             success: true,
             team,
+          };
+        } catch (err) {
+          return {
+            success: false,
+            errors: formatErrors(err),
+          };
+        }
+      }
+    ),
+    addTeamMember: requiresAuth.createResolver(
+      async (parent, { email, teamId }, { models, user }) => {
+        // Made 3 requests to DB, if error occurs later on: check back here
+        try {
+          console.log(1);
+          const teamToAdd = await models.Team.findOne(
+            { where: { id: teamId } },
+            { raw: true }
+          );
+          console.log(2);
+          if (teamToAdd.owner !== user.id) {
+            return {
+              success: false,
+              errors: [
+                {
+                  path: 'email',
+                  message:
+                    'You cannot add members to the team. Only the owner can.',
+                },
+              ],
+            };
+          }
+          console.log(3);
+          const userToAdd = await models.User.findOne(
+            { where: { email } },
+            { raw: true }
+          );
+          console.log(4);
+          if (!userToAdd) {
+            return {
+              success: false,
+              errors: [
+                {
+                  path: 'email',
+                  message: 'Could not find user with email.',
+                },
+              ],
+            };
+          }
+          await models.Member.create({ userId: userToAdd.id, teamId });
+          return {
+            success: true,
           };
         } catch (err) {
           return {
