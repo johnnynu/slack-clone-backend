@@ -17,6 +17,7 @@ export default gql`
 
   type Query {
     allTeams: [Team!]!
+    inviteTeams: [Team!]!
   }
 
   type VoidResponse {
