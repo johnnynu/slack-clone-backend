@@ -21,21 +21,30 @@ export default {
   Mutation: {
     createTeam: requiresAuth.createResolver(
       async (parent, args, { models, user }) => {
+        const check = await models.sequelize.transaction();
         try {
-          const team = await models.Team.create({ ...args, owner: user.id });
-          await models.Channel.create({
-            name: 'general',
-            public: true,
-            teamId: team.id,
-          });
+          const team = await models.Team.create(
+            { ...args, owner: user.id },
+            { transaction: check }
+          );
+          await models.Channel.create(
+            {
+              name: 'general',
+              public: true,
+              teamId: team.id,
+            },
+            { transaction: check }
+          );
+          await check.commit();
           return {
             success: true,
-            team,
+            team, // If error in the future, do team: check
           };
         } catch (err) {
+          await check.rollback();
           return {
             success: false,
-            errors: formatErrors(err),
+            errors: formatErrors(err, models),
           };
         }
       }
@@ -86,7 +95,7 @@ export default {
         } catch (err) {
           return {
             success: false,
-            errors: formatErrors(err),
+            errors: formatErrors(err, models),
           };
         }
       }
