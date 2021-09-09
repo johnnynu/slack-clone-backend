@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server-express");
+const { gql } = require('apollo-server-express');
 
 export default gql`
   type Message {
@@ -6,6 +6,11 @@ export default gql`
     text: String!
     user: User!
     channel: Channel!
+    createdAt: String!
+  }
+
+  type Query {
+    messages(channelId: Int!): [Message!]!
   }
 
   type Mutation {

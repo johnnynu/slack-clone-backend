@@ -1,6 +1,9 @@
-import user from "../models/user";
+import user from '../models/user';
 
 export default {
+  Query: {
+    messages: async (parent, args, { models, user }) => [],
+  },
   Mutation: {
     createMessage: async (parent, args, { models }) => {
       try {
