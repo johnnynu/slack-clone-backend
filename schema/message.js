@@ -8,11 +8,9 @@ export default gql`
     channel: Channel!
     createdAt: String!
   }
-
   type Query {
-    messages(channelId: Int!): [Message!]!
+    allMessages(channelId: Int!): [Message!]!
   }
-
   type Mutation {
     createMessage(channelId: Int!, text: String!): Boolean!
   }
