@@ -8,6 +8,9 @@ export default gql`
     channel: Channel!
     createdAt: String!
   }
+  type Subscription {
+    newChannelMessage(channelId: Int!): Message!
+  }
   type Query {
     allMessages(channelId: Int!): [Message!]!
   }

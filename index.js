@@ -40,9 +40,9 @@ async function startApolloServer() {
         },
       },
     ],
-    context: ({ req }) => ({
+    context: async ({ req, connection }) => ({
       models,
-      user: req.user,
+      user: connection ? connection.context : req.user,
       SECRET,
       SECRET2,
     }),
