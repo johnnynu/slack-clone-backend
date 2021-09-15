@@ -1,5 +1,9 @@
 const express = require('express');
-const { ApolloServer } = require('apollo-server-express');
+const { ApolloServer, gql } = require('apollo-server-express');
+import { createServer } from 'http';
+import { execute, subscribe } from 'graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
 
 import models from './models';
 
@@ -11,6 +15,7 @@ import jwt from 'jsonwebtoken';
 
 const SECRET = 'asdgasdgfsdgdfgsdfgiso';
 const SECRET2 = 'ASDFSDAFASFASFISO';
+const PORT = 4000;
 
 const typeDefs = mergeTypes(fileLoader(path.join(__dirname, './schema')));
 
@@ -18,10 +23,23 @@ const resolvers = mergeResolvers(
   fileLoader(path.join(__dirname, './resolvers'))
 );
 
+const schema = makeExecutableSchema({ typeDefs, resolvers });
+
 async function startApolloServer() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    plugins: [
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            },
+          };
+        },
+      },
+    ],
     context: ({ req }) => ({
       models,
       user: req.user,
@@ -67,11 +85,29 @@ async function startApolloServer() {
   };
   app.use(addUser);
 
+  const httpServer = createServer(app);
+
+  const subscriptionServer = SubscriptionServer.create(
+    {
+      // This is the `schema` we just created.
+      schema,
+      // These are imported from `graphql`.
+      execute,
+      subscribe,
+    },
+    {
+      // This is the `httpServer` we created in a previous step.
+      server: httpServer,
+      // This `server` is the instance returned from `new ApolloServer`.
+      path: server.graphqlPath,
+    }
+  );
+
   server.applyMiddleware({ app, cors: false });
 
   await new Promise((resolve) =>
     models.sequelize.sync({}).then(() => {
-      app.listen({ port: 4000 }, resolve);
+      httpServer.listen({ port: 4000 }, resolve);
     })
   );
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
