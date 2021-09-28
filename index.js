@@ -94,6 +94,30 @@ async function startApolloServer() {
       // These are imported from `graphql`.
       execute,
       subscribe,
+      onConnect: async ({ token, refreshToken }, webSocket) => {
+        if (token && refreshToken) {
+          let user = null;
+          try {
+            const payload = jwt.verify(token, SECRET);
+            user = payload.user;
+          } catch (err) {
+            const newTokens = await refreshTokens(
+              token,
+              refreshToken,
+              models,
+              SECRET,
+              SECRET2
+            );
+            user = newTokens.user;
+
+            if (!user) {
+              throw new Error('Invalid auth tokens');
+            }
+          }
+          return true;
+        }
+        throw new Error('Missing auth tokens!');
+      },
     },
     {
       // This is the `httpServer` we created in a previous step.
@@ -110,7 +134,9 @@ async function startApolloServer() {
       httpServer.listen({ port: 4000 }, resolve);
     })
   );
-  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+  console.log(
+    `🚀 Server ready at http://localhost:4000${server.graphqlPath}/subscriptions`
+  );
   return { server, app };
 }
 
