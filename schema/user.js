@@ -9,8 +9,8 @@ export default gql`
   }
 
   type Query {
-    getUser(id: Int!): User!
     allUsers: [User!]!
+    getUser: User!
   }
 
   type RegisterResponse {
