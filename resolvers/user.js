@@ -4,20 +4,15 @@ import requiresAuth from '../permissions';
 
 export default {
   User: {
-    teams: async (parent, args, { models, user }) => {
-      const teams = await models.Team.findAll(
+    teams: (parent, args, { models, user }) =>
+      models.sequelize.query(
+        'select * from teams as team join members as member on team.id = member.team_id where member.user_id = ?',
         {
-          include: [
-            {
-              model: models.User,
-              where: { id: user.id },
-            },
-          ],
-        },
-        { raw: true }
-      );
-      return teams;
-    },
+          replacements: [user.id],
+          model: models.Team,
+          raw: true,
+        }
+      ),
   },
   Query: {
     allUsers: (parent, args, { models }) => models.User.findAll(),

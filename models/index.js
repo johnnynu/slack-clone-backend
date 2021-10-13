@@ -13,6 +13,10 @@ const models = {
   Message: require('./message').default(sequelize, Sequelize.DataTypes),
   Team: require('./team').default(sequelize, Sequelize.DataTypes),
   Member: require('./member').default(sequelize, Sequelize.DataTypes),
+  DirectMessage: require('./directMessage').default(
+    sequelize,
+    Sequelize.DataTypes
+  ),
 };
 
 Object.keys(models).forEach((modelName) => {

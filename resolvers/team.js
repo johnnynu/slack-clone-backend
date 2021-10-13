@@ -1,4 +1,5 @@
 import formatErrors from '../formatErrors';
+import member from '../models/member';
 import requiresAuth from '../permissions';
 
 export default {
@@ -45,11 +46,11 @@ export default {
       async (parent, { email, teamId }, { models, user }) => {
         // Made 3 requests to DB, if error occurs later on: check back here
         try {
-          const teamToAdd = await models.Team.findOne(
-            { where: { id: teamId } },
+          const memberToAdd = await models.Member.findOne(
+            { where: { teamId, userId: user.id } },
             { raw: true }
           );
-          if (teamToAdd.owner !== user.id) {
+          if (!memberToAdd.admin) {
             return {
               success: false,
               errors: [
